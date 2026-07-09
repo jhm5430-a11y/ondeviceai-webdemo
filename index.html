@@ -24,53 +24,51 @@
   <p id="featDesc" class="feat-desc"></p>
 
   <div class="panels">
-    <!-- ── 학생용 대시보드 (실제 앱 UI 재현) ── -->
+    <!-- ── 학생용 대시보드 (실제 앱 activity_student_dashboard 재현: 단일 컬럼) ── -->
     <div class="frame">
       <div class="frame-label">📱 학생용 대시보드 (모둠 태블릿)</div>
       <div class="student">
-        <div class="s-header">우리 모둠 토론학습</div>
-        <div class="s-grid">
-          <div class="s-left">
-            <div class="s-card">
-              <div class="s-chip">🌱 토론 주제</div>
-              <div id="sTopic" class="s-topic"></div>
-            </div>
-            <div class="s-card ai-card" id="aiCard">
-              <div class="s-chip blue">✨ AI 도움말</div>
-              <div class="ai-flex">
-                <img id="aiAvatar" class="s-robot" src="robot.png" alt="AI 로봇">
-                <div id="aiMsg" class="ai-msg">안녕하세요! 오늘 토론도 함께 힘내 봐요.</div>
-              </div>
-            </div>
-          </div>
-          <div class="s-right">
-            <div class="s-card ring-card">
-              <div class="ring-title">⏱ 현재 단계</div>
-              <div class="ring" id="ringOuter"><div class="ring-in">
-                <div id="ringTime">--:--</div>
-                <div id="ringStage" class="ring-stage">대기 중</div>
-              </div></div>
-              <div id="totalElapsed" class="ring-total">🕐 총 0:00 경과</div>
-              <div class="stage-dots" id="stageDots"></div>
-            </div>
-            <div class="s-card">
-              <div class="s-chip">👥 우리 팀 상태</div>
-              <div class="team-grid">
-                <div>
-                  <small>우리 팀 상태</small>
-                  <div id="teamState" class="team-big ok">✅ 잘 진행 중</div>
-                  <div id="teamSub" class="team-sub">서로의 의견을 잘 나누고 있어요!</div>
-                </div>
-                <div>
-                  <small>주제 적합도</small>
-                  <div id="topicLabel" class="team-big ok">높음 📶</div>
-                  <div id="topicSub" class="team-sub">주제를 잘 유지하고 있어요.</div>
-                </div>
-              </div>
-              <div id="ctxNote" class="ctx-note"></div>
-            </div>
+        <div class="s-title">우리 모둠 토론학습</div>
+
+        <div class="s-card">
+          <div class="s-label teal">🌱 토론 주제</div>
+          <div id="sTopic" class="s-topic"></div>
+        </div>
+
+        <div class="s-card" id="aiCard">
+          <div class="s-label purple">✨ AI 도움말</div>
+          <div class="ai-flex">
+            <div id="aiAvatar" class="s-robot">🤖</div>
+            <div id="aiMsg" class="ai-msg">안녕하세요! 오늘 토론도 함께 힘내 봐요.</div>
           </div>
         </div>
+
+        <div class="s-card">
+          <div class="s-label blue">⏱ 현재 단계</div>
+          <div id="stTimerBig" class="s-timer">--:--</div>
+          <div id="stStageName" class="s-stagename">세션 대기 중</div>
+          <div id="totalElapsed" class="s-elapsed">🕐 총 0:00 경과</div>
+          <div class="stage-dots" id="stageDots"></div>
+          <button id="btnNextStage" class="s-next">다음 단계 ▶</button>
+        </div>
+
+        <div class="s-card">
+          <div class="s-label blue">👥 우리 팀 상태</div>
+          <div class="team-grid">
+            <div>
+              <small>우리 팀 상태</small>
+              <div id="teamState" class="team-big ok">✅ 잘 진행 중</div>
+              <div id="teamSub" class="team-sub">서로의 의견을 잘 나누고 있어요!</div>
+            </div>
+            <div>
+              <small>주제 적합도</small>
+              <div id="topicLabel" class="team-big ok">높음 📶</div>
+              <div id="topicSub" class="team-sub">주제를 잘 유지하고 있어요.</div>
+            </div>
+          </div>
+          <div id="ctxNote" class="ctx-note"></div>
+        </div>
+
         <div class="caption-bar">
           <span class="cap-tag">🎤 지금 들리는 대화 (데모 표시)</span>
           <span id="captionWho" class="cap-who"></span>
@@ -79,60 +77,103 @@
       </div>
     </div>
 
-    <!-- ── 교사용 대시보드 (교사 앱 드릴다운 UI 재현) ── -->
+    <!-- ── 교사용 대시보드 (교사 앱 재현: 전체 모둠 뷰 ↔ 모둠 상세) ── -->
     <div class="frame">
-      <div class="frame-label">🖥️ 교사용 대시보드 — 모둠 상세 (실시간 모니터링)</div>
+      <div class="frame-label">🖥️ 교사용 대시보드 — 모둠 카드를 누르면 상세로 들어갑니다</div>
       <div class="teacher">
-        <div class="d-header">
-          <b>◀ 1모둠 모둠 상세</b>
-          <div class="d-stats">
-            <div><small>진행 단계</small><div id="dStage" class="d-blue">비판검토</div></div>
-            <div><small>전체 시간</small><div id="dTime">0:00</div></div>
-            <div><small>전체 상태</small><div id="dStatus" class="d-green">안정</div></div>
-            <div><small>AI 개입</small><div id="dIvCnt" class="d-purple">0회</div></div>
-          </div>
-        </div>
-        <div class="d-row">
-          <div class="t-panel w12">
-            <div class="t-panel-title blue">👥 구성원 참여 현황</div>
-            <div class="d-gauges">
-              <div><div id="talkPct" class="d-num ok">0</div><small>발화 참여 /100</small></div>
-              <div><div id="silentPct" class="d-num warn">0</div><small>침묵 /100</small></div>
+
+        <!-- 메인: 요약 패널 + 모둠 카드 그리드 -->
+        <div id="tMainView">
+          <div class="m-title">토론학습 교사 대시보드</div>
+          <div class="m-grid">
+            <div class="m-summary">
+              <div class="m-block">
+                <small>💬 토론 주제</small>
+                <div id="mTopic2" class="m-topicline"></div>
+              </div>
+              <div class="m-block">
+                <small>수업 진행 시간</small>
+                <div id="mTime" class="m-time">0:00</div>
+              </div>
+              <div class="m-block m-counts">
+                <div><span class="c-g">✅ 안정</span><b id="cntG" class="c-g">1</b></div>
+                <div><span class="c-y">⚠ 주의</span><b id="cntY" class="c-y">0</b></div>
+                <div><span class="c-r">🚨 개입필요</span><b id="cntR" class="c-r">0</b></div>
+              </div>
+              <div class="m-block">
+                <small>📋 활동 단계 흐름</small>
+                <div id="mStageFlow" class="m-flow"></div>
+              </div>
             </div>
-            <small class="d-sub">발언 분포</small>
-            <div id="spkBars"></div>
-          </div>
-          <div class="t-panel">
-            <div class="t-panel-title red">🎯 주제 및 내용 적합성</div>
-            <div id="topicScore" class="d-score ok">—</div>
-            <small class="d-sub center">주제 적합도 /100</small>
-            <div class="pb"><div id="pbTopic"></div></div>
-            <div class="d-counters">
-              <div><small>🔇 침묵 경보</small><div id="cntSilence" class="d-cnt r">0회</div></div>
-              <div><small>🗣 중첩 발화</small><div id="cntOverlap" class="d-cnt y">0회</div></div>
+            <div class="m-cards">
+              <div id="mCard" class="g-card" title="누르면 모둠 상세로 들어갑니다">
+                <div class="g-name">1모둠</div>
+                <div class="g-stage">현재 단계&nbsp;&nbsp;<span id="mStage">비판검토</span></div>
+                <div class="g-cols">
+                  <div><small>남은 시간</small><div id="mRemain" class="g-val">5:00</div></div>
+                  <div><small>주제 적합도</small><div id="mTopicPct" class="g-val ok">85%</div></div>
+                </div>
+                <div id="mStatus" class="g-big green">안정</div>
+                <div id="mTag" class="g-chip">&nbsp;</div>
+              </div>
             </div>
           </div>
         </div>
-        <div class="d-row">
-          <div class="t-panel w12">
-            <div class="t-panel-title blue">☁️ 대화 키워드</div>
-            <div id="wordCloud" class="cloud"></div>
+
+        <!-- 상세: 드릴다운 -->
+        <div id="tDetailView" class="hidden">
+          <div class="d-header">
+            <b id="btnBack" title="전체 모둠 뷰로">◀ 1모둠 모둠 상세</b>
+            <div class="d-stats">
+              <div><small>진행 단계</small><div id="dStage" class="d-blue">비판검토</div></div>
+              <div><small>전체 시간</small><div id="dTime">0:00</div></div>
+              <div><small>전체 상태</small><div id="dStatus" class="d-green">안정</div></div>
+              <div><small>AI 개입</small><div id="dIvCnt" class="d-purple">0회</div></div>
+            </div>
           </div>
-          <div class="t-panel">
-            <div class="t-panel-title green">✨ AI 개입 효과 (개입 후 60초 기준)</div>
-            <div id="ivEffects" class="fx"><small class="dim">개입 발생 시 전후 변화를 집계합니다</small></div>
+          <div class="d-row">
+            <div class="t-panel">
+              <div class="t-panel-title blue">👥 구성원 참여 현황</div>
+              <div class="d-gauges">
+                <div><div id="talkPct" class="d-num ok">0</div><small>발화 참여 /100</small></div>
+                <div><div id="silentPct" class="d-num warn">0</div><small>침묵 /100</small></div>
+              </div>
+              <small class="d-sub">발언 분포</small>
+              <div id="spkBars"></div>
+            </div>
+            <div class="t-panel">
+              <div class="t-panel-title red">🎯 주제 및 내용 적합성</div>
+              <div id="topicScore" class="d-score ok">—</div>
+              <small class="d-sub center">주제 적합도 /100</small>
+              <div class="pb"><div id="pbTopic"></div></div>
+              <div class="d-counters">
+                <div><small>🔇 침묵 경보</small><div id="cntSilence" class="d-cnt r">0회</div></div>
+                <div><small>🗣 중첩 발화</small><div id="cntOverlap" class="d-cnt y">0회</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="d-row">
+            <div class="t-panel">
+              <div class="t-panel-title blue">☁️ 대화 키워드</div>
+              <div id="wordCloud" class="cloud"></div>
+            </div>
+            <div class="t-panel">
+              <div class="t-panel-title green">✨ AI 개입 효과 (개입 후 60초 기준)</div>
+              <div id="ivEffects" class="fx"><small class="dim">개입 발생 시 전후 변화를 집계합니다</small></div>
+            </div>
+          </div>
+          <div class="d-row">
+            <div class="t-panel">
+              <div class="t-panel-title purple">🤖 AI 개입 이력</div>
+              <ul id="tLog" class="t-log"><li class="log-empty">아직 개입이 없습니다.</li></ul>
+            </div>
+            <div class="t-panel">
+              <div class="t-panel-title blue">💬 STT 대화 로그</div>
+              <ul id="sttLog" class="t-log stt"><li class="log-empty">대화가 시작되면 전사가 표시됩니다.</li></ul>
+            </div>
           </div>
         </div>
-        <div class="d-row">
-          <div class="t-panel w12">
-            <div class="t-panel-title purple">🤖 AI 개입 이력</div>
-            <ul id="tLog" class="t-log"><li class="log-empty">아직 개입이 없습니다.</li></ul>
-          </div>
-          <div class="t-panel">
-            <div class="t-panel-title blue">💬 STT 대화 로그</div>
-            <ul id="sttLog" class="t-log stt"><li class="log-empty">대화가 시작되면 전사가 표시됩니다.</li></ul>
-          </div>
-        </div>
+
         <p class="minimal-note">💡 최소 개입 원칙 — <span class="y">노란불</span>은 교사에게만 표시되고,
           <span class="r">빨간불</span>일 때만 AI가 학생에게 개입합니다.</p>
       </div>

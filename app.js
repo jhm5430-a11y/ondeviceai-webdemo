@@ -1,4 +1,4 @@
-/* 온디바이스 AI 협력학습 데모 — 학생: 시안 UI / 교사: 드릴다운(GroupDetailActivity) 재현 */
+/* 온디바이스 AI 협력학습 데모 — 학생: 실제 앱 UI / 교사: 전체 모둠 뷰 ↔ 모둠 상세(드릴다운) */
 (function () {
   "use strict";
   const $ = (id) => document.getElementById(id);
@@ -13,7 +13,7 @@
   let phase = "idle";
   let fired = {};
   let talk = {}, lastSpeechEnd = 0, stageIdx = STAGE_IDX, topicVal = 0.85;
-  let sttDone = new Set(), words = {}, overlapCnt = 0, silenceCnt = 0;
+  let sttDone = new Set(), words = {}, overlapCnt = 0;
 
   $("featureGrid").innerHTML = "";
   DEMO_DATA.features.forEach((f) => {
@@ -22,6 +22,16 @@
     b.onclick = () => select(f, b);
     $("featureGrid").appendChild(b);
   });
+
+  // 교사 뷰 전환: 모둠 카드 ↔ 드릴다운
+  $("mCard").onclick = () => { $("tMainView").classList.add("hidden"); $("tDetailView").classList.remove("hidden"); };
+  $("btnBack").onclick = () => { $("tDetailView").classList.add("hidden"); $("tMainView").classList.remove("hidden"); };
+  // 학생 수동 단계 진행 (실제 앱의 [다음 단계 ▶])
+  $("btnNextStage").onclick = () => {
+    if (stageIdx >= DEMO_DATA.stages.length - 1) return;
+    stageIdx++;
+    renderStageDots();
+  };
 
   function select(f, btn) {
     document.querySelectorAll("#featureGrid button").forEach((x) => x.classList.remove("sel"));
@@ -46,7 +56,7 @@
     fired = { yellow: false, red: false, enc: false, recovered: false, advanced: false };
     talk = {}; DEMO_DATA.speakers.forEach((s) => (talk[s] = 0));
     lastSpeechEnd = 0; stageIdx = STAGE_IDX; topicVal = feat && feat.type === "topic" ? 0.88 : 0.85;
-    sttDone = new Set(); words = {}; overlapCnt = 0; silenceCnt = 0;
+    sttDone = new Set(); words = {}; overlapCnt = 0;
     $("btnPlay").disabled = false;
     $("btnPlay").textContent = "▶ 체험 시작";
     $("progFill").style.width = "0";
@@ -63,17 +73,19 @@
     $("captionWho").className = "cap-who";
     $("captionText").textContent = "▶ 버튼을 누르면 모둠 대화가 재생됩니다.";
     $("captionText").className = "cap-text";
-    updateRing(0);
+    updateTimer(0);
     renderStageDots();
-    // 교사용 드릴다운
+    // 교사용 (메인 + 상세)
+    $("mTopic2").textContent = DEMO_DATA.topic;
     setStatus("green", "안정");
+    $("mTag").innerHTML = "&nbsp;";
     $("dIvCnt").textContent = "0회";
-    $("dTime").textContent = "0:00";
+    $("dTime").textContent = "0:00"; $("mTime").textContent = "0:00";
     $("talkPct").textContent = "0";
     $("silentPct").textContent = "0";
     $("cntSilence").textContent = "0회";
     $("cntOverlap").textContent = "0회";
-    $("wordCloud").innerHTML = '<span class="dim" style="color:#8AA0B4">대화가 시작되면 키워드가 쌓입니다</span>';
+    $("wordCloud").innerHTML = '<span style="color:#8AA0B4">대화가 시작되면 키워드가 쌓입니다</span>';
     $("ivEffects").innerHTML = '<small class="dim">개입 발생 시 전후 변화를 집계합니다</small>';
     $("tLog").innerHTML = '<li class="log-empty">아직 개입이 없습니다.</li>';
     $("sttLog").innerHTML = '<li class="log-empty">대화가 시작되면 전사가 표시됩니다.</li>';
@@ -96,8 +108,7 @@
     if (phase === "done") reset();
     phase = "playing";
     $("btnPlay").disabled = true;
-    // 개입 오디오 언락(자동재생 정책): 사용자 클릭 안에서 무음 재생→즉시 정지
-    iv.muted = true;
+    iv.muted = true;    // 자동재생 정책 언락
     iv.play().then(() => { iv.pause(); iv.currentTime = 0; iv.muted = false; })
       .catch(() => { iv.muted = false; });
     scenario.play().catch((e) => {
@@ -121,7 +132,8 @@
     $("progFill").style.width = (t / feat.duration) * 100 + "%";
     $("clock").textContent = `${mmss(t)} / ${mmss(feat.duration)}`;
     $("dTime").textContent = mmss(t);
-    updateRing(t);
+    $("mTime").textContent = mmss(t);
+    updateTimer(t);
     const cur = feat.utts.find((u) => t >= u.t0 && t < u.t1);
     updateCaption(cur, t);
     if (cur) { talk[cur.sp] = (talk[cur.sp] || 0) + dt; lastSpeechEnd = Math.max(lastSpeechEnd, Math.min(t, cur.t1)); }
@@ -136,6 +148,7 @@
     if (feat.yellowAt != null && !fired.yellow && t >= feat.yellowAt) {
       fired.yellow = true;
       setStatus("yellow", "주의");
+      $("mTag").textContent = feat.yellowReason;
       log("🟡", `주의 — ${feat.yellowReason} <small>(교사에게만 표시)</small>`, "y");
     }
     if (feat.redAt != null && !fired.red && t >= feat.redAt) { fired.red = true; intervene("red"); }
@@ -143,6 +156,7 @@
     if (fired.red && !fired.recovered && t >= feat.redAt + 6) {
       fired.recovered = true;
       setStatus("green", "안정");
+      $("mTag").innerHTML = "&nbsp;";
       log("🟢", "개입 후 회복 — 대화 정상화", "g");
       showEffects(t);
     }
@@ -161,7 +175,8 @@
     if (kind === "red") {
       setStatus("red", "개입필요");
       $("dIvCnt").textContent = "1회";
-      if (feat.type === "silence") { silenceCnt = 1; $("cntSilence").textContent = "1회"; }
+      $("mTag").textContent = feat.redReason;
+      if (feat.type === "silence") $("cntSilence").textContent = "1회";
       $("ivEffects").innerHTML = `<small class="dim">[${mmss(feat.redAt)}] ${feat.name} → 효과 집계 중…</small>`;
       log("🔴", `AI 개입 — ${feat.redReason}<br><small>“${feat.ivText}”</small>`, "r");
     } else {
@@ -191,7 +206,7 @@
     $("captionText").textContent = "체험 종료 — 다른 기능도 골라 보세요!";
   }
 
-  // ── 개입 효과(전후 10초 비교) — 교사 앱 interventionEffects 방식 축약 ──
+  // ── 개입 효과(전후 비교) — 교사 앱 interventionEffects 축약판 ──
   function showEffects(now) {
     const red = feat.redAt, W = 10;
     const win = (a, b) => feat.utts.filter((u) => u.t1 > a && u.t0 < b);
@@ -212,7 +227,7 @@
       : `<small class="dim">[${mmss(red)}] ${feat.name} → 뚜렷한 변화 없음</small>`;
   }
 
-  // ── 학생용 UI ──────────────────────────────────────────────
+  // ── 학생용 UI (실제 앱 구성) ────────────────────────────────
   function setAiMsg(text, cls) {
     const m = $("aiMsg");
     m.textContent = text;
@@ -237,21 +252,27 @@
     const pb = $("pbTopic");
     pb.style.width = pct + "%";
     pb.style.background = v < 0.4 ? "var(--red)" : v < 0.55 ? "var(--yellow)" : "var(--green)";
+    const mp = $("mTopicPct");
+    mp.textContent = pct + "%";
+    mp.className = "g-val " + (v < 0.4 ? "bad" : v < 0.55 ? "warn" : "ok");
   }
-  function updateRing(t) {
+  function updateTimer(t) {
     const total = stageTotal();
     const remain = Math.max(0, total - t);
-    $("ringOuter").style.background = `conic-gradient(var(--ring) ${(remain / total) * 100}%, #E5EEF7 0)`;
-    const rt = $("ringTime");
-    rt.textContent = mmss(remain);
-    rt.className = remain <= 0 ? "over" : (feat.type === "timer" && remain <= 10) ? "warn" : "";
+    const el = $("stTimerBig");
+    el.textContent = mmss(remain);
+    el.className = "s-timer" + (remain <= 0 ? " over" : (feat && feat.type === "timer" && remain <= 10) ? " warn" : "");
     $("totalElapsed").textContent = `🕐 총 ${mmss(t)} 경과`;
+    $("mRemain").textContent = mmss(remain);
   }
   function renderStageDots() {
     $("stageDots").innerHTML = DEMO_DATA.stages.map((s, i) =>
       `<span class="${i === stageIdx ? "cur" : i < stageIdx ? "done" : ""}">● ${s}</span>`).join("");
+    $("stStageName").textContent = DEMO_DATA.stages[stageIdx];
     $("dStage").textContent = DEMO_DATA.stages[stageIdx];
-    $("ringStage").textContent = DEMO_DATA.stages[stageIdx];
+    $("mStage").textContent = DEMO_DATA.stages[stageIdx];
+    $("mStageFlow").innerHTML = DEMO_DATA.stages.map((s, i) =>
+      `<span class="${i === stageIdx ? "cur" : i < stageIdx ? "done" : ""}">${i + 1}. ${s}</span>`).join("");
   }
   function updateCaption(cur, t) {
     const who = $("captionWho"), txt = $("captionText");
@@ -285,11 +306,18 @@
     }
   }
 
-  // ── 교사용 드릴다운 UI ─────────────────────────────────────
+  // ── 교사용 UI (메인 카드 + 드릴다운 동시 갱신) ───────────────
   function setStatus(color, label) {
     const el = $("dStatus");
     el.textContent = label;
     el.className = "d-" + color;
+    const big = $("mStatus");
+    big.textContent = label;
+    big.className = "g-big " + color;
+    $("mCard").className = "g-card" + (color === "yellow" ? " y" : color === "red" ? " r" : "");
+    $("cntG").textContent = color === "green" ? "1" : "0";
+    $("cntY").textContent = color === "yellow" ? "1" : "0";
+    $("cntR").textContent = color === "red" ? "1" : "0";
   }
   function updateGauges(t) {
     const tot = Math.max(1, t);
@@ -302,21 +330,18 @@
     feat.utts.forEach((u, i) => {
       if (t >= u.t1 && !sttDone.has(i)) {
         sttDone.add(i);
-        // STT 로그 (화자별 색)
         const ul = $("sttLog");
         const empty = ul.querySelector(".log-empty");
         if (empty) empty.remove();
         const li = document.createElement("li");
         li.innerHTML = `<b style="color:${SPK_COLORS[u.sp]}">[${mmss(u.t0)}] ${u.sp}:</b> ${u.text}`;
         ul.prepend(li);
-        // 키워드 클라우드 (조사 대충 스트립 + 불용어)
         (u.text.match(/[가-힣]{2,}|[A-Za-z]{2,}/g) || []).forEach((w0) => {
           const w = w0.replace(/(은|는|이|가|을|를|에|의|도|만|로|으로|에서|이라|라고|하고|까지|부터|랑|이나|나)$/, "");
           if (w.length < 2 || STOPWORDS.has(w)) return;
           words[w] = (words[w] || 0) + 1;
         });
         renderCloud();
-        // 중첩 카운터
         if (u.ovl) { overlapCnt++; $("cntOverlap").textContent = overlapCnt + "회"; }
       }
     });
