@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>온디바이스 AI 협력학습 지원 시스템 — 체험 데모</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>🤖 온디바이스 AI 협력학습 퍼실리테이터 <span class="badge">체험 데모</span></h1>
+  <p class="sub">태블릿 한 대가 모둠 토론을 듣고, 필요할 때만 개입합니다 — 기능을 골라 40초 시나리오를 들어보세요.
+    소리가 나오니 볼륨을 켜 주세요 🔊</p>
+  <p class="topic-line">토론 주제 — <b id="hdrTopic"></b></p>
+</header>
+
+<nav id="featureGrid" aria-label="기능 선택"></nav>
+
+<section id="stage" class="hidden">
+  <div class="controls">
+    <button id="btnPlay" class="primary">▶ 체험 시작</button>
+    <button id="btnReset">⟲ 처음부터</button>
+    <div class="progress"><div id="progFill"></div></div>
+    <span id="clock">0:00 / 0:40</span>
+  </div>
+  <p id="featDesc" class="feat-desc"></p>
+
+  <div class="panels">
+    <!-- 학생용 태블릿 -->
+    <div class="tablet">
+      <div class="tablet-head">
+        <span class="panel-label">📱 학생용 대시보드 (모둠 태블릿)</span>
+        <span id="stTimer" class="stage-timer"></span>
+      </div>
+      <div class="stage-dots" id="stageDots"></div>
+
+      <div class="ai-zone">
+        <div id="aiAvatar" class="avatar">🤖</div>
+        <div id="aiBubble" class="bubble hidden"></div>
+      </div>
+
+      <div class="caption-box">
+        <div id="captionWho" class="cap-who">대기 중</div>
+        <div id="captionText" class="cap-text">▶ 버튼을 누르면 모둠 대화가 재생됩니다.</div>
+      </div>
+
+      <div class="widgets">
+        <div class="widget">
+          <div class="w-title">팀 발화 분포</div>
+          <div id="spkBars"></div>
+        </div>
+        <div class="widget">
+          <div class="w-title">주제 적합도</div>
+          <div class="gauge"><div id="topicFill"></div></div>
+          <div id="topicPct" class="gauge-num">—</div>
+          <div id="ctxWidget" class="ctx-widget"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 교사용 대시보드 -->
+    <div class="teacher">
+      <div class="panel-label light">🖥️ 교사용 대시보드 (실시간 모니터링)</div>
+      <div id="tCard" class="t-card green">
+        <div class="t-row1"><b>1모둠</b><span id="tStatus" class="t-status">안정</span></div>
+        <div class="t-row2">
+          <div><small>현재 단계</small><div id="tStage">비판검토</div></div>
+          <div><small>남은 시간</small><div id="tRemain">3:00</div></div>
+          <div><small>주제 적합도</small><div id="tTopic">—</div></div>
+          <div><small>AI 개입</small><div id="tIvCnt">0회</div></div>
+        </div>
+        <div id="tTag" class="t-tag hidden"></div>
+      </div>
+      <div class="t-log-title">이벤트 로그</div>
+      <ul id="tLog" class="t-log"><li class="log-empty">아직 이벤트가 없습니다.</li></ul>
+      <p class="minimal-note">💡 최소 개입 원칙 — <span class="y">노란불</span>은 교사에게만 표시되고,
+        <span class="r">빨간불</span>일 때만 AI가 학생에게 개입합니다.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  KERIS 「온디바이스 AI 기반 협력학습 지원 시스템 개발 및 현장 적용 연구」 · 충남대학교 —
+  모든 음성은 시나리오용 합성 음성이며, 실제 시스템은 태블릿 내부에서만 음성을 처리합니다(외부 전송 없음).
+</footer>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
