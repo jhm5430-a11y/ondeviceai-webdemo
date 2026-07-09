@@ -30,43 +30,49 @@
       <div class="student">
         <div class="s-title">우리 모둠 토론학습</div>
 
-        <div class="s-card">
-          <div class="s-label teal">🌱 토론 주제</div>
-          <div id="sTopic" class="s-topic"></div>
-        </div>
-
-        <div class="s-card" id="aiCard">
-          <div class="s-label purple">✨ AI 도움말</div>
-          <div class="ai-flex">
-            <div id="aiAvatar" class="s-robot">🤖</div>
-            <div id="aiMsg" class="ai-msg">안녕하세요! 오늘 토론도 함께 힘내 봐요.</div>
-          </div>
-        </div>
-
-        <div class="s-card">
-          <div class="s-label blue">⏱ 현재 단계</div>
-          <div id="stTimerBig" class="s-timer">--:--</div>
-          <div id="stStageName" class="s-stagename">세션 대기 중</div>
-          <div id="totalElapsed" class="s-elapsed">🕐 총 0:00 경과</div>
-          <div class="stage-dots" id="stageDots"></div>
-          <button id="btnNextStage" class="s-next">다음 단계 ▶</button>
-        </div>
-
-        <div class="s-card">
-          <div class="s-label blue">👥 우리 팀 상태</div>
-          <div class="team-grid">
-            <div>
-              <small>우리 팀 상태</small>
-              <div id="teamState" class="team-big ok">✅ 잘 진행 중</div>
-              <div id="teamSub" class="team-sub">서로의 의견을 잘 나누고 있어요!</div>
+        <div class="s-grid">
+          <div class="s-left">
+            <div class="s-card">
+              <div class="s-label teal">🌱 토론 주제</div>
+              <div id="sTopic" class="s-topic"></div>
             </div>
-            <div>
-              <small>주제 적합도</small>
-              <div id="topicLabel" class="team-big ok">높음 📶</div>
-              <div id="topicSub" class="team-sub">주제를 잘 유지하고 있어요.</div>
+
+            <div class="s-card s-ai" id="aiCard">
+              <div class="s-label purple">✨ AI 도움말</div>
+              <div class="ai-flex">
+                <div id="aiAvatar" class="s-robot">🤖</div>
+                <div id="aiMsg" class="ai-msg">안녕하세요! 오늘 토론도 함께 힘내 봐요.</div>
+              </div>
             </div>
           </div>
-          <div id="ctxNote" class="ctx-note"></div>
+
+          <div class="s-right">
+            <div class="s-card s-stage">
+              <div class="s-label blue">⏱ 현재 단계</div>
+              <div id="stTimerBig" class="s-timer">--:--</div>
+              <div id="stStageName" class="s-stagename">세션 대기 중</div>
+              <div id="totalElapsed" class="s-elapsed">🕐 총 0:00 경과</div>
+              <div class="stage-dots" id="stageDots"></div>
+              <button id="btnNextStage" class="s-next">다음 단계 ▶</button>
+            </div>
+
+            <div class="s-card">
+              <div class="s-label blue">👥 우리 팀 상태</div>
+              <div class="team-grid">
+                <div>
+                  <small>우리 팀 상태</small>
+                  <div id="teamState" class="team-big ok">✅ 잘 진행 중</div>
+                  <div id="teamSub" class="team-sub">서로의 의견을 잘 나누고 있어요!</div>
+                </div>
+                <div>
+                  <small>주제 적합도</small>
+                  <div id="topicLabel" class="team-big ok">높음 📶</div>
+                  <div id="topicSub" class="team-sub">주제를 잘 유지하고 있어요.</div>
+                </div>
+              </div>
+              <div id="ctxNote" class="ctx-note"></div>
+            </div>
+          </div>
         </div>
 
         <div class="caption-bar">
