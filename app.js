@@ -50,6 +50,7 @@
     $("sTopic").textContent = DEMO_DATA.topic;
     setAiMsg("안녕하세요! 오늘 토론도 함께 힘내 봐요.", "");
     $("aiAvatar").classList.remove("speaking");
+    $("aiCard").classList.remove("active");
     setTeam("ok", "✅ 잘 진행 중", "서로의 의견을 잘 나누고 있어요!");
     setTopic(topicVal);
     $("ctxNote").textContent = "";
@@ -116,7 +117,6 @@
       fired.recovered = true;
       teacherCard("green", "안정");
       $("tTag").classList.add("hidden");
-      setTeam("ok", "✅ 잘 진행 중", "다시 골고루 이야기하고 있어요!");
       log("🟢", "개입 후 회복 — 대화 정상화", "g");
     }
   }
@@ -125,6 +125,7 @@
     phase = "intervene";
     scenario.pause();
     setAiMsg(feat.ivText, kind === "encourage" ? "encourage" : "");
+    $("aiCard").classList.add("active");   // 학생 화면에서는 AI 도움말 카드만 강조됨
     $("aiAvatar").classList.add("speaking");
     $("captionWho").textContent = "AI 퍼실리테이터";
     $("captionWho").className = "cap-who";
@@ -134,10 +135,8 @@
       teacherCard("red", "개입필요");
       showTag(feat.redReason);
       $("tIvCnt").textContent = "1회";
-      setTeam("ai", "🤖 AI가 도와주는 중", "AI 도움말을 함께 들어 보세요.");
       log("🔴", `AI 개입 — ${feat.redReason}<br><small>“${feat.ivText}”</small>`, "r");
     } else {
-      setTeam("ok", "🎉 아주 잘하고 있어요", "근거를 들어 활발하게 참여 중!");
       log("✨", `격려 — “${feat.ivText}”`, "g");
     }
     iv.play();
@@ -145,6 +144,7 @@
 
   function afterIntervention() {
     $("aiAvatar").classList.remove("speaking");
+    $("aiCard").classList.remove("active");
     if ((feat.type === "flow" || feat.type === "timer") && !fired.advanced) {
       fired.advanced = true;
       stageIdx = Math.min(stageIdx + 1, DEMO_DATA.stages.length - 1);
