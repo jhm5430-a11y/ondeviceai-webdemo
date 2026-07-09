@@ -82,25 +82,41 @@ nav#featureGrid .fi { font-size: 20px; display: block; margin-bottom: 2px; }
 .cap-text { color: var(--s-ink); }
 .cap-text.off { color: var(--red); }
 
-/* ══ 교사용 — 교사 앱(item_group_card·드릴다운) 재현 ══ */
+/* ══ 교사용 — 교사 앱 드릴다운(GroupDetailActivity) 재현 ══ */
 .teacher { background: var(--bg); border: 1px solid #d7e3ee; border-radius: 16px; padding: 10px; }
-.t-card { background: #fff; border-radius: 14px; padding: 14px; box-shadow: 0 1px 4px rgba(29,53,87,.14); border: 2px solid transparent; transition: border-color .3s; }
-.t-card.y { border-color: var(--yellow); } .t-card.r { border-color: var(--red); animation: blink 1.2s 3; }
-@keyframes blink { 50% { background: #fdf0f0; } }
-.t-name { font-size: 17px; font-weight: bold; }
-.t-stage { font-size: 12px; color: var(--dim); padding-top: 4px; }
-.t-stage span { color: var(--ink); }
-.t-cols { display: grid; grid-template-columns: 1fr 1fr; padding-top: 6px; }
-.t-cols small { color: var(--dim); font-size: 11px; }
-.t-val { font-size: 16px; font-weight: bold; font-variant-numeric: tabular-nums; }
-.t-val.ok { color: var(--green); } .t-val.warn { color: var(--yellow); } .t-val.bad { color: var(--red); }
-.t-big { text-align: center; font-size: 30px; font-weight: bold; padding: 8px 0 6px; }
-.t-big.green { color: var(--green); } .t-big.yellow { color: var(--yellow); } .t-big.red { color: var(--red); }
-.t-chip { background: #EEF3F8; border-radius: 8px; padding: 6px; text-align: center; font-size: 11px; color: #5B7083; }
-.t-panel { background: #fff; border-radius: 14px; padding: 12px 14px; margin-top: 10px; box-shadow: 0 1px 4px rgba(29,53,87,.14); }
-.t-panel-title { font-size: 13px; font-weight: bold; margin-bottom: 8px; }
+.d-header { background: #fff; border-radius: 14px; padding: 10px 14px; box-shadow: 0 1px 4px rgba(29,53,87,.14);
+  display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 15px; }
+.d-stats { display: flex; gap: 16px; }
+.d-stats small { color: var(--dim); font-size: 10.5px; display: block; }
+.d-stats div > div { font-weight: bold; font-size: 14px; }
+.d-blue { color: var(--blue); } .d-green { color: var(--green); } .d-yellow { color: var(--yellow); }
+.d-red { color: var(--red); } .d-purple { color: #7C6BD6; }
+.d-row { display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px; align-items: stretch; }
+.d-row .t-panel { margin-top: 8px; }
+.t-panel { background: #fff; border-radius: 14px; padding: 10px 12px; box-shadow: 0 1px 4px rgba(29,53,87,.14); }
+.t-panel-title { font-size: 12.5px; font-weight: bold; margin-bottom: 6px; }
 .t-panel-title.blue { color: var(--blue); } .t-panel-title.purple { color: #7C6BD6; }
-.ivcnt { float: right; color: #7C6BD6; }
+.t-panel-title.red { color: var(--red); } .t-panel-title.green { color: var(--green); }
+.d-gauges { display: flex; justify-content: space-around; text-align: center; margin: 4px 0 8px; }
+.d-gauges small { color: var(--dim); font-size: 10.5px; }
+.d-num { font-size: 26px; font-weight: bold; }
+.d-num.ok { color: var(--green); } .d-num.warn { color: var(--yellow); }
+.d-sub { color: var(--dim); font-size: 10.5px; display: block; margin-bottom: 3px; }
+.d-sub.center { text-align: center; }
+.d-score { text-align: center; font-size: 34px; font-weight: bold; }
+.d-score.ok { color: var(--green); } .d-score.warn { color: var(--yellow); } .d-score.bad { color: var(--red); }
+.pb { height: 8px; background: #EEF3F8; border-radius: 4px; overflow: hidden; margin: 4px 0 8px; }
+#pbTopic { height: 100%; width: 0; background: var(--green); transition: width .3s, background .3s; }
+.d-counters { display: flex; justify-content: space-around; text-align: center; }
+.d-counters small { color: var(--dim); font-size: 10.5px; }
+.d-cnt { font-size: 18px; font-weight: bold; }
+.d-cnt.r { color: var(--red); } .d-cnt.y { color: var(--yellow); }
+.cloud { min-height: 52px; line-height: 1.9; }
+.cloud span { margin-right: 8px; color: #5B7083; }
+.cloud span.big { color: var(--blue); font-weight: bold; }
+.fx { font-size: 12.5px; min-height: 52px; line-height: 1.5; }
+.fx .dim { color: var(--dim); }
+.fx b { color: var(--green); }
 .spk-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
 .spk-name { width: 34px; font-size: 12.5px; color: var(--ink); }
 .spk-name.talking { color: var(--blue); font-weight: bold; }
