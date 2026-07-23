@@ -26,6 +26,13 @@
   // 교사 뷰 전환: 모둠 카드 ↔ 드릴다운
   $("mCard").onclick = () => { $("tMainView").classList.add("hidden"); $("tDetailView").classList.remove("hidden"); };
   $("btnBack").onclick = () => { $("tDetailView").classList.add("hidden"); $("tMainView").classList.remove("hidden"); };
+  // 수업 설정(데모 표시용) 펼치기/접기
+  $("btnClassCfg").onclick = () => $("cfgPanel").classList.toggle("hidden");
+  $("cfgTopic").textContent = DEMO_DATA.topic;
+  // 모둠 카드 하단 배지: 지표별 아이콘 (교사 앱 reasonIcon 재현)
+  const TYPE_ICON = { neglect: "👤", gini: "⚖️", topic: "🎯", silence: "⏸️", overlap: "🗣️",
+    volume: "🔈", question: "💬", abuse: "🚫", timer: "⏱️", flow: "🪜" };
+  let curStatus = "green";   // 로드맵 현재 단계 링 색 연동
   // 학생 수동 단계 진행 (실제 앱의 [다음 단계 ▶])
   $("btnNextStage").onclick = () => {
     if (stageIdx >= DEMO_DATA.stages.length - 1) return;
@@ -85,30 +92,32 @@
     $("aiAvatar").classList.remove("speaking");
     $("aiAvatar").src = "robot_green.png";
     $("aiCard").classList.remove("active");
-    setTeam("ok", "✅ 잘 진행 중", "서로의 의견을 잘 나누고 있어요!");
+    setTeam("ok", "✅ 잘 진행 중");
     setTopic(topicVal);
     $("ctxNote").textContent = "";
     $("captionWho").textContent = "";
     $("captionWho").className = "cap-who";
     $("captionText").textContent = "▶ 버튼을 누르면 모둠 대화가 재생됩니다.";
     $("captionText").className = "cap-text";
-    updateTimer(0);
-    renderStageDots();
     // 교사용 (메인 + 상세)
     $("mTopic2").textContent = DEMO_DATA.topic;
     setStatus("green", "안정");
-    $("mTag").innerHTML = "&nbsp;";
+    $("mTag").innerHTML = "&nbsp;"; $("mTag").className = "g-chip";
     $("dIvCnt").textContent = "0회";
     $("dTime").textContent = "0:00"; $("mTime").textContent = "0:00";
-    $("balancePct").textContent = "100";
+    setSemi("semiBalance", "balancePct", 100, "var(--green)");
     setDonut(0);
     $("silenceNow").textContent = "현재 0초";
     $("cntSilence").textContent = "0회";
     $("cntOverlap").textContent = "0회";
     $("wordCloud").innerHTML = '<span style="color:#8AA0B4">대화가 시작되면 키워드가 쌓입니다</span>';
+    $("topicSpkBars").innerHTML = "";
+    $("topicBadge").classList.add("hidden");
     $("ivEffects").innerHTML = '<small class="dim">개입 발생 시 전후 변화를 집계합니다</small>';
     $("tLog").innerHTML = '<li class="log-empty">아직 개입이 없습니다.</li>';
     $("sttLog").innerHTML = '<li class="log-empty">대화가 시작되면 전사가 표시됩니다.</li>';
+    updateTimer(0);
+    renderStageDots();
     renderBars(null);
   }
 
@@ -168,7 +177,8 @@
     if (feat.yellowAt != null && !fired.yellow && t >= feat.yellowAt) {
       fired.yellow = true;
       setStatus("yellow", "주의");
-      $("mTag").textContent = feat.yellowReason;
+      $("mTag").innerHTML = `${TYPE_ICON[feat.type] || "⚠️"} ${feat.yellowReason}`;
+      $("mTag").className = "g-chip y";
       log("🟡", `주의 — ${feat.yellowReason} <small>(교사에게만 표시)</small>`, "y");
       if (feat.type === "abuse") {
         log("🤖", `AI는 <b>의도적으로 반응하지 않습니다</b> — AI가 반응하면 재미로 따라 하는 역효과가 있어, 학생 화면은 그대로 두고 선생님께만 알립니다.`, "g");
@@ -178,7 +188,7 @@
     if (feat.type === "abuse" && fired.yellow && !fired.recovered && t >= feat.yellowAt + 9) {
       fired.recovered = true;
       setStatus("green", "안정");
-      $("mTag").innerHTML = "&nbsp;";
+      $("mTag").innerHTML = "&nbsp;"; $("mTag").className = "g-chip";
       log("🟢", "선생님이 조용히 다가가 직접 지도 — 상황 종료", "g");
     }
     if (feat.redAt != null && !fired.red && t >= feat.redAt) { fired.red = true; intervene("red"); }
@@ -186,7 +196,7 @@
     if (fired.red && !fired.recovered && t >= feat.redAt + 6) {
       fired.recovered = true;
       setStatus("green", "안정");
-      $("mTag").innerHTML = "&nbsp;";
+      $("mTag").innerHTML = "&nbsp;"; $("mTag").className = "g-chip";
       log("🟢", "개입 후 회복 — 대화 정상화", "g");
       showEffects(t);
     }
@@ -207,7 +217,8 @@
     if (kind === "red") {
       setStatus("red", "개입필요");
       $("dIvCnt").textContent = "1회";
-      $("mTag").textContent = feat.redReason;
+      $("mTag").innerHTML = `${TYPE_ICON[feat.type] || "⚠️"} ${feat.redReason}`;
+      $("mTag").className = "g-chip r";
       if (feat.type === "silence") $("cntSilence").textContent = "1회";
       $("ivEffects").innerHTML = `<small class="dim">[${mmss(feat.redAt)}] ${feat.name} → 효과 집계 중…</small>`;
       log("🔴", `AI 개입 — ${feat.redReason}<br><small>“${feat.ivText}”</small>`, "r");
@@ -266,39 +277,41 @@
     m.textContent = text;
     m.className = "ai-msg" + (cls ? " " + cls : "");
   }
-  function setTeam(cls, big, sub) {
+  function setTeam(cls, big) {
     const el = $("teamState");
     el.textContent = big;
     el.className = "team-big " + cls;
-    $("teamSub").textContent = sub;
   }
   function setTopic(v) {
     topicVal = v;
     const pct = Math.round(v * 100);
-    const lab = $("topicLabel"), sub = $("topicSub");
-    if (v >= 0.55) { lab.textContent = "높음 📶"; lab.className = "team-big ok"; sub.textContent = "주제를 잘 유지하고 있어요."; }
-    else if (v >= 0.4) { lab.textContent = "보통 〽️"; lab.className = "team-big warn"; sub.textContent = "주제가 조금 흔들리고 있어요."; }
-    else { lab.textContent = "낮음 📉"; lab.className = "team-big bad"; sub.textContent = "주제로 돌아와 볼까요?"; }
-    const sc = $("topicScore");
-    sc.textContent = pct;
-    sc.className = "d-score " + (v < 0.4 ? "bad" : v < 0.55 ? "warn" : "ok");
-    const pb = $("pbTopic");
-    pb.style.width = pct + "%";
-    pb.style.background = v < 0.4 ? "var(--red)" : v < 0.55 ? "var(--yellow)" : "var(--green)";
+    const lv = v >= 0.55 ? "ok" : v >= 0.4 ? "warn" : "bad";
+    // 학생: 바 아이콘(왼쪽) + 텍스트 — 실기기와 동일, 군더더기 문구 없음
+    $("topicBars").className = "tbars " + lv;
+    const lab = $("topicLabel");
+    lab.textContent = lv === "ok" ? "높음" : lv === "warn" ? "보통" : "낮음";
+    lab.className = lv;
+    // 교사 상세: 주제 적합도 반원 게이지 + 주제이탈 배지
+    setSemi("semiTopic", "topicScore", pct,
+      lv === "ok" ? "var(--green)" : lv === "warn" ? "var(--yellow)" : "var(--red)");
+    $("topicBadge").classList.toggle("hidden", v >= 0.4);
     const mp = $("mTopicPct");
     mp.textContent = pct + "%";
-    mp.className = "g-val " + (v < 0.4 ? "bad" : v < 0.55 ? "warn" : "ok");
+    mp.className = "g-val " + lv;
   }
   function updateTimer(t) {
     const total = stageTotal();
     const remain = Math.max(0, total - t);
-    const el = $("stTimerBig");
-    el.textContent = mmss(remain);
-    el.className = "s-timer" + (remain <= 0 ? " over" : (feat && feat.type === "timer" && remain <= 10) ? " warn" : "");
+    // 학생: 원형 링 진행률 + 남은 시간
+    $("stTimerBig").textContent = mmss(remain);
+    const ring = $("stRing");
+    ring.style.setProperty("--p", Math.max(0, Math.min(100, (remain / total) * 100)));
+    ring.className = "ring" + (remain <= 0 ? " over" : (feat && feat.type === "timer" && remain <= 10) ? " warn" : "");
     // 수업 전체 남은 시간 = 현재 단계 남음 + 이후 단계 계획(우측 상단 표시)
     const future = Math.max(0, DEMO_DATA.stages.length - stageIdx - 1) * STAGE_TOTAL;
     $("totalRemain").textContent = `⏳ 수업 전체 ${mmss(remain + future)} 남음`;
     $("mRemain").textContent = mmss(remain);
+    $("dRemain").textContent = mmss(remain);
   }
   function renderStageDots() {
     $("stageDots").innerHTML = DEMO_DATA.stages.map((s, i) =>
@@ -306,8 +319,15 @@
     $("stStageName").textContent = DEMO_DATA.stages[stageIdx];
     $("dStage").textContent = DEMO_DATA.stages[stageIdx];
     $("mStage").textContent = DEMO_DATA.stages[stageIdx];
-    $("mStageFlow").innerHTML = DEMO_DATA.stages.map((s, i) =>
-      `<span class="${i === stageIdx ? "cur" : i < stageIdx ? "done" : ""}">${i + 1}. ${s}</span>`).join("");
+    // 교사 메인: 활동 단계별 모둠 현황 — 로드맵(점·세로선, 현재 단계는 상태색 링)
+    const sCls = curStatus === "yellow" ? "y" : curStatus === "red" ? "r" : "";
+    $("mStageFlow").innerHTML =
+      `<div class="road-head"><b>1모둠</b></div>` +
+      DEMO_DATA.stages.map((s, i) => {
+        const rowCls = i === stageIdx ? "cur" : i < stageIdx ? "done" : "";
+        const dotCls = i === stageIdx ? `cur ${sCls}` : i < stageIdx ? "done" : "";
+        return `<div class="road-row ${rowCls}"><span class="road-label">${s}</span><span class="road-dot ${dotCls}"></span></div>`;
+      }).join("");
   }
   function updateCaption(cur, t) {
     const who = $("captionWho"), txt = $("captionText");
@@ -343,24 +363,38 @@
 
   // ── 교사용 UI (메인 카드 + 드릴다운 동시 갱신) ───────────────
   function setStatus(color, label) {
+    curStatus = color;
     const el = $("dStatus");
     el.textContent = label;
     el.className = "d-" + color;
     const big = $("mStatus");
     big.textContent = label;
     big.className = "g-big " + color;
-    $("mCard").className = "g-card" + (color === "yellow" ? " y" : color === "red" ? " r" : "");
+    // 카드 테두리 = 상태색 (안정=초록, 주의=노랑, 개입필요=빨강 — 실기기와 동일)
+    $("mCard").className = "g-card " + (color === "yellow" ? "y" : color === "red" ? "r" : "g");
     $("cntG").textContent = color === "green" ? "1" : "0";
     $("cntY").textContent = color === "yellow" ? "1" : "0";
     $("cntR").textContent = color === "red" ? "1" : "0";
+    renderStageDots();   // 로드맵 현재 단계 링 색도 상태색으로 갱신
+  }
+  // 반원 게이지 공통 (SemiCircleGaugeView 재현)
+  function setSemi(gaugeId, valId, pct, color) {
+    const g = $(gaugeId);
+    g.style.setProperty("--p", Math.max(0, Math.min(100, pct)));
+    g.style.setProperty("--gc", color);
+    const v = $(valId);
+    v.textContent = Math.round(pct);
+    v.style.color = color;
   }
   function updateGauges(t) {
     const tot = Math.max(1, t);
     const talkSum = Object.values(talk).reduce((a, b) => a + b, 0);
-    // 발화 활성화 비율(도넛) + 참여 균형지수 + 현재 침묵 초
+    // 발화 활성화 비율(도넛) + 참여 균형지수(반원) + 현재 침묵 초
     const active = Math.min(100, Math.round((talkSum / tot) * 100));
     setDonut(active);
-    $("balancePct").textContent = balanceOf(Object.values(talk));
+    const bal = balanceOf(Object.values(talk));
+    setSemi("semiBalance", "balancePct", bal,
+      bal >= 70 ? "var(--green)" : bal >= 50 ? "var(--yellow)" : "var(--red)");
     $("silenceNow").textContent = `현재 ${Math.max(0, Math.floor(t - lastSpeechEnd))}초`;
   }
   // 발화 활성화 도넛 (conic-gradient) — 색은 활성화 수준별
@@ -401,9 +435,24 @@
           words[w] = (words[w] || 0) + 1;
         });
         renderCloud();
+        renderTopicSpkBars();
         if (u.ovl) { overlapCnt++; $("cntOverlap").textContent = overlapCnt + "회"; }
       }
     });
+  }
+  // 구성원별 주제 적합 발화비율 — 완료된 발화 중 주제 유지(off 아님) 시간 비율
+  function renderTopicSpkBars() {
+    const done = feat.utts.filter((_, i) => sttDone.has(i));
+    $("topicSpkBars").innerHTML = DEMO_DATA.speakers.map((s) => {
+      const mine = done.filter((u) => u.sp === s);
+      const tot = mine.reduce((a, u) => a + (u.t1 - u.t0), 0);
+      const on = mine.filter((u) => !u.off).reduce((a, u) => a + (u.t1 - u.t0), 0);
+      const pct = tot > 0 ? Math.round((on / tot) * 100) : 0;
+      return `<div class="spk-row">
+        <span class="spk-name">${s}</span>
+        <span class="spk-track"><span class="spk-fill" style="width:${pct}%;background:${SPK_COLORS[s]}"></span></span>
+        <span class="spk-pct">${pct}%</span></div>`;
+    }).join("");
   }
   function renderCloud() {
     const top = Object.entries(words).sort((a, b) => b[1] - a[1]).slice(0, 14);

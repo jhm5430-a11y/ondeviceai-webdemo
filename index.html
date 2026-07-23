@@ -54,24 +54,26 @@
           <div class="s-right">
             <div class="s-card s-stage">
               <div class="s-label blue">⏱ 현재 단계 남은 시간</div>
-              <div id="stTimerBig" class="s-timer">--:--</div>
+              <!-- 실기기와 동일: 원형 진행 링(CircularTimerView) 안에 남은 시간 -->
+              <div id="stRing" class="ring"><div id="stTimerBig" class="ring-txt">--:--</div></div>
               <div id="stStageName" class="s-stagename">세션 대기 중</div>
               <div class="stage-dots" id="stageDots"></div>
               <button id="btnNextStage" class="s-next">다음 단계 ▶</button>
             </div>
 
-            <div class="s-card">
+            <div class="s-card s-team">
               <div class="s-label blue">👥 우리 팀 상태</div>
               <div class="team-grid">
                 <div>
                   <small>우리 팀 상태</small>
                   <div id="teamState" class="team-big ok">✅ 잘 진행 중</div>
-                  <div id="teamSub" class="team-sub">서로의 의견을 잘 나누고 있어요!</div>
                 </div>
                 <div>
                   <small>주제 적합도</small>
-                  <div id="topicLabel" class="team-big ok">높음 📶</div>
-                  <div id="topicSub" class="team-sub">주제를 잘 유지하고 있어요.</div>
+                  <div class="team-big topic-flex">
+                    <span id="topicBars" class="tbars ok"><i></i><i></i><i></i></span>
+                    <span id="topicLabel" class="ok">높음</span>
+                  </div>
                 </div>
               </div>
               <div id="ctxNote" class="ctx-note"></div>
@@ -94,11 +96,19 @@
 
         <!-- 메인: 요약 패널 + 모둠 카드 그리드 -->
         <div id="tMainView">
-          <div class="m-title">토론학습 교사 대시보드</div>
+          <div class="m-title">수업 운영 현황</div>
           <div class="m-grid">
             <div class="m-summary">
+              <div class="m-block m-btn">🔗 연결 관리 (1/1)</div>
+              <div class="m-block m-btn" id="btnClassCfg">⚙️ 수업 설정 (주제·키워드·시간·임계치)</div>
+              <div id="cfgPanel" class="cfg-panel hidden">
+                <b>💬 주제</b> <span id="cfgTopic"></span><br>
+                <b>🔑 키워드</b> 산출물, 인정, 조건, 표시, 설명<br>
+                <b>⏱ 단계 시간</b> 8 / 10 / 12 / 10분<br>
+                <b>🎚 임계치</b> 침묵 개입 20초 · 발언독점 지니 0.40 · 주제 컷 0.50
+              </div>
               <div class="m-block">
-                <small>💬 토론 주제</small>
+                <small>💬 협력학습 주제</small>
                 <div id="mTopic2" class="m-topicline"></div>
               </div>
               <div class="m-block">
@@ -111,17 +121,17 @@
                 <div><span class="c-r">🚨 개입필요</span><b id="cntR" class="c-r">0</b></div>
               </div>
               <div class="m-block">
-                <small>📋 활동 단계 흐름</small>
-                <div id="mStageFlow" class="m-flow"></div>
+                <small>📋 활동 단계별 모둠 현황</small>
+                <div id="mStageFlow" class="road"></div>
               </div>
             </div>
             <div class="m-cards">
-              <div id="mCard" class="g-card" title="누르면 모둠 상세로 들어갑니다">
+              <div id="mCard" class="g-card g" title="누르면 모둠 상세로 들어갑니다">
                 <div class="g-name">1모둠</div>
                 <div class="g-stage">현재 단계&nbsp;&nbsp;<span id="mStage">비판검토</span></div>
                 <div class="g-cols">
                   <div><small>남은 시간</small><div id="mRemain" class="g-val">5:00</div></div>
-                  <div><small>주제 적합도</small><div id="mTopicPct" class="g-val ok">85%</div></div>
+                  <div><small>주제 적합</small><div id="mTopicPct" class="g-val ok">85%</div></div>
                 </div>
                 <div id="mStatus" class="g-big green">안정</div>
                 <div id="mTag" class="g-chip">&nbsp;</div>
@@ -143,32 +153,39 @@
           <div id="warnDetail" class="warn-detail">지표 이름을 누르면 여기에 설명이 표시됩니다.</div>
         </div>
 
-        <!-- 상세: 드릴다운 (GroupDetailActivity) -->
+        <!-- 상세: 드릴다운 (GroupDetailActivity — 실기기 캡처 기준 2×2 + 하단 STT) -->
         <div id="tDetailView" class="hidden">
           <div class="d-header">
             <b id="btnBack" title="전체 모둠 뷰로">◀ 1모둠 모둠 상세</b>
             <div class="d-stats">
-              <div><small>진행 단계</small><div id="dStage" class="d-blue">비판검토</div></div>
+              <div><small>현재 단계</small><div id="dStage" class="d-blue">비판검토</div></div>
+              <div><small>현재 단계 남은 시간</small><div id="dRemain" class="d-blue">5:00</div></div>
               <div><small>전체 시간</small><div id="dTime">0:00</div></div>
-              <div><small>전체 상태</small><div id="dStatus" class="d-green">안정</div></div>
-              <div><small>AI 개입</small><div id="dIvCnt" class="d-purple">0회</div></div>
+              <div><small>현재 상태</small><div id="dStatus" class="d-green">안정</div></div>
+              <div><small>AI 개입</small><div id="dIvCnt" class="d-red">0회</div></div>
             </div>
           </div>
 
           <div class="d-row">
             <div class="t-panel">
               <div class="t-panel-title blue">👥 참여 균형</div>
-              <div class="d-gauges">
-                <div><div id="balancePct" class="d-num ok">100</div><small>참여 균형지수 /100</small></div>
+              <div class="semi-wrap">
+                <div id="semiBalance" class="semi"><b id="balancePct">100</b></div>
+                <small>참여 균형지수 /100</small>
               </div>
               <small class="d-sub">구성원별 발언 비율</small>
               <div id="spkBars"></div>
             </div>
             <div class="t-panel">
-              <div class="t-panel-title red">🎯 주제 및 내용 적합성</div>
-              <div id="topicScore" class="d-score ok">—</div>
-              <small class="d-sub center">주제 적합도 /100</small>
-              <div class="pb"><div id="pbTopic"></div></div>
+              <div class="t-panel-title red">🎯 주제 및 내용 분석</div>
+              <div class="semi-wrap">
+                <div id="semiTopic" class="semi"><b id="topicScore">—</b></div>
+                <small>주제 적합도 /100</small>
+              </div>
+              <div class="badge-line"><span id="topicBadge" class="topic-badge hidden">🎯 주제이탈</span></div>
+              <div id="wordCloud" class="cloud"></div>
+              <small class="d-sub">구성원별 주제 적합 발화비율</small>
+              <div id="topicSpkBars" class="thinbars"></div>
             </div>
           </div>
 
@@ -193,19 +210,21 @@
               </div>
             </div>
             <div class="t-panel">
-              <div class="t-panel-title blue">☁️ 대화 키워드</div>
-              <div id="wordCloud" class="cloud"></div>
+              <div class="t-panel-title purple">✨ AI 개입 분석</div>
+              <div class="iv-cols">
+                <div>
+                  <small class="d-sub">AI 개입 이력</small>
+                  <ul id="tLog" class="t-log"><li class="log-empty">아직 개입이 없습니다.</li></ul>
+                </div>
+                <div>
+                  <small class="d-sub">개입 후 변화 (60초 기준)</small>
+                  <div id="ivEffects" class="fx"><small class="dim">개입 발생 시 전후 변화를 집계합니다</small></div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="d-row">
-            <div class="t-panel">
-              <div class="t-panel-title purple">✨ AI 개입 분석</div>
-              <small class="d-sub">개입 후 변화 (60초 기준)</small>
-              <div id="ivEffects" class="fx"><small class="dim">개입 발생 시 전후 변화를 집계합니다</small></div>
-              <small class="d-sub">개입 이력</small>
-              <ul id="tLog" class="t-log"><li class="log-empty">아직 개입이 없습니다.</li></ul>
-            </div>
+          <div class="d-row one">
             <div class="t-panel">
               <div class="t-panel-title blue">💬 STT 대화 로그</div>
               <ul id="sttLog" class="t-log stt"><li class="log-empty">대화가 시작되면 전사가 표시됩니다.</li></ul>
