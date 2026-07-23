@@ -33,6 +33,24 @@
     renderStageDots();
   };
 
+  // 교사 메인 하단 경고 지표 범례 — 탭하면 설명 (교사 앱 setupWarningLegend 재현)
+  const WARN_DETAIL = {
+    neglect: "소외학생 — 특정 학생이 오랫동안 발언이 없거나 발화 비율이 매우 낮을 때 감지합니다. 모둠에서 소외되는 구성원이 없는지 살펴보세요.",
+    gini_dominance: "발언독점 — 한 학생이 대화를 과도하게 점유할 때 감지합니다(발화시간 지니계수 기준). 다른 학생의 의견을 유도해 주세요.",
+    topic_focus: "주제이탈 — 최근 대화가 등록된 토론 주제·키워드에서 벗어났을 때 감지합니다.",
+    silence_mgmt: "침묵 — 모둠 전체가 일정 시간 이상 말이 없을 때 감지합니다. 사고형 침묵인지 멈춤형 침묵인지 확인이 필요합니다.",
+    overlap: "중첩발화 — 여러 학생이 동시에 말해 발화가 겹칠 때 감지합니다. 한 사람씩 말하도록 정리가 필요할 수 있습니다.",
+    volume: "발화볼륨 — 특정 학생의 목소리가 모둠 평균보다 크게 지속될 때 감지합니다.",
+    question_prompt: "질문유도 — 오랫동안 서로에게 질문이 오가지 않을 때 감지합니다. 질문은 사고를 확장합니다.",
+  };
+  document.querySelectorAll("#warnLegend span").forEach((sp) => {
+    sp.onclick = () => {
+      document.querySelectorAll("#warnLegend span").forEach((x) => x.classList.remove("sel"));
+      sp.classList.add("sel");
+      $("warnDetail").textContent = WARN_DETAIL[sp.dataset.k] || "";
+    };
+  });
+
   function select(f, btn) {
     document.querySelectorAll("#featureGrid button").forEach((x) => x.classList.remove("sel"));
     btn.classList.add("sel");
@@ -65,6 +83,7 @@
     $("sTopic").textContent = DEMO_DATA.topic;
     setAiMsg("안녕하세요! 오늘 토론도 함께 힘내 봐요.", "");
     $("aiAvatar").classList.remove("speaking");
+    $("aiAvatar").src = "robot_green.png";
     $("aiCard").classList.remove("active");
     setTeam("ok", "✅ 잘 진행 중", "서로의 의견을 잘 나누고 있어요!");
     setTopic(topicVal);
@@ -81,8 +100,9 @@
     $("mTag").innerHTML = "&nbsp;";
     $("dIvCnt").textContent = "0회";
     $("dTime").textContent = "0:00"; $("mTime").textContent = "0:00";
-    $("talkPct").textContent = "0";
-    $("silentPct").textContent = "0";
+    $("balancePct").textContent = "100";
+    setDonut(0);
+    $("silenceNow").textContent = "현재 0초";
     $("cntSilence").textContent = "0회";
     $("cntOverlap").textContent = "0회";
     $("wordCloud").innerHTML = '<span style="color:#8AA0B4">대화가 시작되면 키워드가 쌓입니다</span>';
@@ -168,6 +188,8 @@
     setAiMsg(feat.ivText, kind === "encourage" ? "encourage" : "");
     $("aiCard").classList.add("active");
     $("aiAvatar").classList.add("speaking");
+    // 학생 앱과 동일: 🔴 개입 중에만 로봇 빨강(><), 격려는 초록 유지
+    if (kind === "red") $("aiAvatar").src = "robot_red.png";
     $("captionWho").textContent = "AI 퍼실리테이터";
     $("captionWho").className = "cap-who";
     $("captionText").textContent = "(AI 음성 개입 중…)";
@@ -187,6 +209,7 @@
 
   function afterIntervention() {
     $("aiAvatar").classList.remove("speaking");
+    $("aiAvatar").src = "robot_green.png";
     $("aiCard").classList.remove("active");
     if ((feat.type === "flow" || feat.type === "timer") && !fired.advanced) {
       fired.advanced = true;
@@ -262,7 +285,9 @@
     const el = $("stTimerBig");
     el.textContent = mmss(remain);
     el.className = "s-timer" + (remain <= 0 ? " over" : (feat && feat.type === "timer" && remain <= 10) ? " warn" : "");
-    $("totalElapsed").textContent = `🕐 총 ${mmss(t)} 경과`;
+    // 수업 전체 남은 시간 = 현재 단계 남음 + 이후 단계 계획(우측 상단 표시)
+    const future = Math.max(0, DEMO_DATA.stages.length - stageIdx - 1) * STAGE_TOTAL;
+    $("totalRemain").textContent = `⏳ 수업 전체 ${mmss(remain + future)} 남음`;
     $("mRemain").textContent = mmss(remain);
   }
   function renderStageDots() {
@@ -322,9 +347,33 @@
   function updateGauges(t) {
     const tot = Math.max(1, t);
     const talkSum = Object.values(talk).reduce((a, b) => a + b, 0);
-    const pct = Math.min(100, Math.round((talkSum / tot) * 100));
-    $("talkPct").textContent = pct;
-    $("silentPct").textContent = 100 - pct;
+    // 발화 활성화 비율(도넛) + 참여 균형지수 + 현재 침묵 초
+    const active = Math.min(100, Math.round((talkSum / tot) * 100));
+    setDonut(active);
+    $("balancePct").textContent = balanceOf(Object.values(talk));
+    $("silenceNow").textContent = `현재 ${Math.max(0, Math.floor(t - lastSpeechEnd))}초`;
+  }
+  // 발화 활성화 도넛 (conic-gradient) — 색은 활성화 수준별
+  function setDonut(pct) {
+    // 발화 활성화 비율이 낮으면 빨강, 경고는 노랑 (침묵감지 임계 개념과 정렬)
+    const color = pct >= 50 ? "var(--green)" : pct >= 30 ? "var(--yellow)" : "var(--red)";
+    const el = $("donutActivity");
+    el.style.setProperty("--p", pct);
+    el.style.setProperty("--dc", color);
+    const b = $("actPct");
+    b.textContent = pct + "%";
+    b.style.color = color;
+  }
+  // 참여 균형지수 = 100 - 정규화 지니(발화시간 분포). 전원 무발화면 100(완전 균형).
+  function balanceOf(vals) {
+    const arr = vals.filter((v) => v >= 0);
+    const n = arr.length, sum = arr.reduce((a, b) => a + b, 0);
+    if (n < 2 || sum <= 0) return 100;
+    const s = [...arr].sort((a, b) => a - b);
+    let w = 0; s.forEach((v, i) => (w += (i + 1) * v));
+    let g = (2 * w) / (n * sum) - (n + 1) / n;
+    g = g / (1 - 1 / n);
+    return Math.round((1 - Math.max(0, Math.min(1, g))) * 100);
   }
   function harvestStt(t) {
     feat.utts.forEach((u, i) => {

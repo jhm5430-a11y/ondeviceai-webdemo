@@ -24,11 +24,15 @@
   <p id="featDesc" class="feat-desc"></p>
 
   <div class="panels">
-    <!-- ── 학생용 대시보드 (실제 앱 activity_student_dashboard 재현: 단일 컬럼) ── -->
+    <!-- ── 학생용 대시보드 (실제 앱 activity_student_dashboard 재현) ── -->
     <div class="frame">
       <div class="frame-label">📱 학생용 대시보드 (모둠 태블릿)</div>
       <div class="student">
-        <div class="s-title">우리 모둠 토론학습</div>
+        <!-- 상단 바: 제목(가운데) + 수업 전체 남은 시간(우측 상단) -->
+        <div class="s-head">
+          <div class="s-title">우리 모둠 토론학습</div>
+          <div id="totalRemain" class="s-total">⏳ 수업 전체 0:00 남음</div>
+        </div>
 
         <div class="s-grid">
           <div class="s-left">
@@ -40,7 +44,7 @@
             <div class="s-card s-ai" id="aiCard">
               <div class="s-label purple">✨ AI 도움말</div>
               <div class="ai-flex">
-                <div id="aiAvatar" class="s-robot">🤖</div>
+                <img id="aiAvatar" class="s-robot" src="robot_green.png" alt="AI 로봇" />
                 <div id="aiMsg" class="ai-msg">안녕하세요! 오늘 토론도 함께 힘내 봐요.</div>
               </div>
             </div>
@@ -48,10 +52,9 @@
 
           <div class="s-right">
             <div class="s-card s-stage">
-              <div class="s-label blue">⏱ 현재 단계</div>
+              <div class="s-label blue">⏱ 현재 단계 남은 시간</div>
               <div id="stTimerBig" class="s-timer">--:--</div>
               <div id="stStageName" class="s-stagename">세션 대기 중</div>
-              <div id="totalElapsed" class="s-elapsed">🕐 총 0:00 경과</div>
               <div class="stage-dots" id="stageDots"></div>
               <button id="btnNextStage" class="s-next">다음 단계 ▶</button>
             </div>
@@ -124,9 +127,22 @@
               </div>
             </div>
           </div>
+
+          <!-- [제거 용이] 경고 지표 범례 — 탭하면 설명 (교수 설문 후 삭제 가능) -->
+          <div class="warn-legend" id="warnLegend">
+            <small>경고 지표 (탭하면 설명)</small>
+            <span data-k="neglect">👤 소외학생</span>
+            <span data-k="gini_dominance">⚖️ 발언독점</span>
+            <span data-k="topic_focus">🎯 주제이탈</span>
+            <span data-k="silence_mgmt">⏸️ 침묵</span>
+            <span data-k="overlap">🗣️ 중첩발화</span>
+            <span data-k="volume">🔈 발화볼륨</span>
+            <span data-k="question_prompt">💬 질문유도</span>
+          </div>
+          <div id="warnDetail" class="warn-detail">지표 이름을 누르면 여기에 설명이 표시됩니다.</div>
         </div>
 
-        <!-- 상세: 드릴다운 -->
+        <!-- 상세: 드릴다운 (GroupDetailActivity) -->
         <div id="tDetailView" class="hidden">
           <div class="d-header">
             <b id="btnBack" title="전체 모둠 뷰로">◀ 1모둠 모둠 상세</b>
@@ -137,14 +153,14 @@
               <div><small>AI 개입</small><div id="dIvCnt" class="d-purple">0회</div></div>
             </div>
           </div>
+
           <div class="d-row">
             <div class="t-panel">
-              <div class="t-panel-title blue">👥 구성원 참여 현황</div>
+              <div class="t-panel-title blue">👥 참여 균형</div>
               <div class="d-gauges">
-                <div><div id="talkPct" class="d-num ok">0</div><small>발화 참여 /100</small></div>
-                <div><div id="silentPct" class="d-num warn">0</div><small>침묵 /100</small></div>
+                <div><div id="balancePct" class="d-num ok">100</div><small>참여 균형지수 /100</small></div>
               </div>
-              <small class="d-sub">발언 분포</small>
+              <small class="d-sub">구성원별 발언 비율</small>
               <div id="spkBars"></div>
             </div>
             <div class="t-panel">
@@ -152,25 +168,41 @@
               <div id="topicScore" class="d-score ok">—</div>
               <small class="d-sub center">주제 적합도 /100</small>
               <div class="pb"><div id="pbTopic"></div></div>
-              <div class="d-counters">
-                <div><small>🔇 침묵 경보</small><div id="cntSilence" class="d-cnt r">0회</div></div>
-                <div><small>🗣 중첩 발화</small><div id="cntOverlap" class="d-cnt y">0회</div></div>
-              </div>
             </div>
           </div>
+
           <div class="d-row">
+            <div class="t-panel">
+              <div class="t-panel-title yellow">⚠️ 상호작용 경보</div>
+              <div class="int-cells">
+                <div>
+                  <small>⏸️ 침묵 감지</small>
+                  <div id="cntSilence" class="d-cnt r">0회</div>
+                  <small id="silenceNow" class="dimx">현재 0초</small>
+                </div>
+                <div>
+                  <div class="donut" id="donutActivity">
+                    <div class="dn-in"><b id="actPct">0%</b><em>발화 활성화</em></div>
+                  </div>
+                </div>
+                <div>
+                  <small>🗣 중첩 발화</small>
+                  <div id="cntOverlap" class="d-cnt y">0회</div>
+                </div>
+              </div>
+            </div>
             <div class="t-panel">
               <div class="t-panel-title blue">☁️ 대화 키워드</div>
               <div id="wordCloud" class="cloud"></div>
             </div>
-            <div class="t-panel">
-              <div class="t-panel-title green">✨ AI 개입 효과 (개입 후 60초 기준)</div>
-              <div id="ivEffects" class="fx"><small class="dim">개입 발생 시 전후 변화를 집계합니다</small></div>
-            </div>
           </div>
+
           <div class="d-row">
             <div class="t-panel">
-              <div class="t-panel-title purple">🤖 AI 개입 이력</div>
+              <div class="t-panel-title purple">✨ AI 개입 분석</div>
+              <small class="d-sub">개입 후 변화 (60초 기준)</small>
+              <div id="ivEffects" class="fx"><small class="dim">개입 발생 시 전후 변화를 집계합니다</small></div>
+              <small class="d-sub">개입 이력</small>
               <ul id="tLog" class="t-log"><li class="log-empty">아직 개입이 없습니다.</li></ul>
             </div>
             <div class="t-panel">
