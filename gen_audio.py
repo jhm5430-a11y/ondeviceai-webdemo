@@ -175,6 +175,24 @@ FEATURES = [
              u(30.5, "하준", "좋아, 그럼 합친 조건으로 정리해 보자."),
              u(35.0, "지호", "이번 모둠 발표 기대되는데?"),
          ]),
+    # 비속어: AI는 의도적으로 무개입(반응하면 재미로 따라 하는 역효과) — 교사 태그만.
+    # ivText=None → 개입 mp3 생성 안 함, redAt=None → 웹 UI가 개입 연출을 하지 않음.
+    dict(id="abuse", name="비속어 감지", icon="🚫", type="abuse",
+         desc="비속어·놀림을 감지하면 AI는 일부러 반응하지 않고, 교사 대시보드에만 '욕설(빠른개입)'을 표시합니다. AI가 반응하면 재미로 따라 하는 역효과를 막기 위한 설계입니다.",
+         yellowAt=21, redAt=None, encourageAt=None,
+         yellowReason="욕설(빠른개입)", redReason=None,
+         ivText=None,
+         utts=[
+             u(0.5, "수아", "조건부 인정 쪽으로 의견이 모이는 것 같아. 조건을 하나씩 정리해 보자."),
+             u(5.5, "지호", "AI를 썼다고 밝히는 게 첫 번째 조건이지."),
+             u(9.5, "하준", "그리고 어디를 고쳤는지 표시하는 것도 필요하고."),
+             u(14.0, "윤서", "음, 그런데 수정 표시는 어떻게 하는 거야?"),
+             u(18.0, "지호", "야, 바보야. 그것도 몰라? 하하."),
+             u(22.5, "하준", "바보래요, 바보래요. 하하하."),
+             u(27.0, "수아", "얘들아, 그런 말 하지 말자. 윤서야, 문서에 색깔로 표시하면 돼."),
+             u(32.5, "윤서", "아, 그렇구나. 고마워."),
+             u(36.0, "지호", "미안, 미안. 그럼 다음 조건 이야기하자."),
+         ]),
 ]
 
 
@@ -249,12 +267,15 @@ def build_feature(f):
     out = os.path.join(AUD, f"scenario_{f['id']}.mp3")
     sh(["ffmpeg.exe", "-y", "-loglevel", "error", *ins,
         "-filter_complex", ";".join(fl), "-map", "[out]", "-b:a", "96k", wslpath(out)])
-    # 4) 개입 TTS
-    iv = os.path.join(AUD, f"iv_{f['id']}.mp3")
-    if not os.path.exists(iv):
-        synth(f["ivText"], VOICE["AI"], iv)
-    f["ivDur"] = round(dur_of(iv), 2)
-    print(f"  scenario {dur_f}s / red {f.get('redAt')} / iv {f['ivDur']}s / 발화 {n}개", flush=True)
+    # 4) 개입 TTS (ivText 없는 기능 = AI 무개입 → 생성 생략)
+    if f.get("ivText"):
+        iv = os.path.join(AUD, f"iv_{f['id']}.mp3")
+        if not os.path.exists(iv):
+            synth(f["ivText"], VOICE["AI"], iv)
+        f["ivDur"] = round(dur_of(iv), 2)
+    else:
+        f["ivDur"] = None
+    print(f"  scenario {dur_f}s / red {f.get('redAt')} / iv {f.get('ivDur')}s / 발화 {n}개", flush=True)
 
 
 def main():

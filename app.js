@@ -59,7 +59,7 @@
     $("featDesc").textContent = `${f.icon} ${f.name} — ${f.desc}`;
     stopAll();
     scenario = new Audio(`audio/scenario_${f.id}.mp3`);
-    iv = new Audio(`audio/iv_${f.id}.mp3`);
+    iv = f.ivText ? new Audio(`audio/iv_${f.id}.mp3`) : new Audio();   // AI 무개입 기능은 개입 mp3 없음
     scenario.preload = iv.preload = "auto";
     scenario.onended = () => finish();
     scenario.onerror = () => audioFail("시나리오");
@@ -170,6 +170,16 @@
       setStatus("yellow", "주의");
       $("mTag").textContent = feat.yellowReason;
       log("🟡", `주의 — ${feat.yellowReason} <small>(교사에게만 표시)</small>`, "y");
+      if (feat.type === "abuse") {
+        log("🤖", `AI는 <b>의도적으로 반응하지 않습니다</b> — AI가 반응하면 재미로 따라 하는 역효과가 있어, 학생 화면은 그대로 두고 선생님께만 알립니다.`, "g");
+      }
+    }
+    // 비속어: AI 무개입 설계 — 교사가 직접 다가가 지도하는 흐름으로 회복 연출
+    if (feat.type === "abuse" && fired.yellow && !fired.recovered && t >= feat.yellowAt + 9) {
+      fired.recovered = true;
+      setStatus("green", "안정");
+      $("mTag").innerHTML = "&nbsp;";
+      log("🟢", "선생님이 조용히 다가가 직접 지도 — 상황 종료", "g");
     }
     if (feat.redAt != null && !fired.red && t >= feat.redAt) { fired.red = true; intervene("red"); }
     if (feat.encourageAt != null && !fired.enc && t >= feat.encourageAt) { fired.enc = true; intervene("encourage"); }

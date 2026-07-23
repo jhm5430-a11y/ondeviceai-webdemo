@@ -824,6 +824,105 @@ const DEMO_DATA = {
      "off": false
     }
    ]
+  },
+  {
+   "id": "abuse",
+   "name": "비속어 감지",
+   "icon": "🚫",
+   "type": "abuse",
+   "desc": "비속어·놀림을 감지하면 AI는 일부러 반응하지 않고, 교사 대시보드에만 '욕설(빠른개입)'을 표시합니다. AI가 반응하면 재미로 따라 하는 역효과를 막기 위한 설계입니다.",
+   "duration": 47.6,
+   "yellowAt": 21,
+   "redAt": null,
+   "encourageAt": null,
+   "yellowReason": "욕설(빠른개입)",
+   "redReason": null,
+   "ivText": null,
+   "ivDur": null,
+   "timerStart": null,
+   "utts": [
+    {
+     "t0": 0.5,
+     "t1": 7.24,
+     "sp": "수아",
+     "text": "조건부 인정 쪽으로 의견이 모이는 것 같아. 조건을 하나씩 정리해 보자.",
+     "loud": false,
+     "ovl": false,
+     "off": false
+    },
+    {
+     "t0": 7.59,
+     "t1": 11.45,
+     "sp": "지호",
+     "text": "AI를 썼다고 밝히는 게 첫 번째 조건이지.",
+     "loud": false,
+     "ovl": false,
+     "off": false
+    },
+    {
+     "t0": 11.8,
+     "t1": 16.43,
+     "sp": "하준",
+     "text": "그리고 어디를 고쳤는지 표시하는 것도 필요하고.",
+     "loud": false,
+     "ovl": false,
+     "off": false
+    },
+    {
+     "t0": 16.78,
+     "t1": 20.09,
+     "sp": "윤서",
+     "text": "음, 그런데 수정 표시는 어떻게 하는 거야?",
+     "loud": false,
+     "ovl": false,
+     "off": false
+    },
+    {
+     "t0": 20.44,
+     "t1": 25.24,
+     "sp": "지호",
+     "text": "야, 바보야. 그것도 몰라? 하하.",
+     "loud": false,
+     "ovl": false,
+     "off": false
+    },
+    {
+     "t0": 25.59,
+     "t1": 30.82,
+     "sp": "하준",
+     "text": "바보래요, 바보래요. 하하하.",
+     "loud": false,
+     "ovl": false,
+     "off": false
+    },
+    {
+     "t0": 31.17,
+     "t1": 37.99,
+     "sp": "수아",
+     "text": "얘들아, 그런 말 하지 말자. 윤서야, 문서에 색깔로 표시하면 돼.",
+     "loud": false,
+     "ovl": false,
+     "off": false
+    },
+    {
+     "t0": 38.34,
+     "t1": 41.03,
+     "sp": "윤서",
+     "text": "아, 그렇구나. 고마워.",
+     "loud": false,
+     "ovl": false,
+     "off": false
+    },
+    {
+     "t0": 41.38,
+     "t1": 46.4,
+     "sp": "지호",
+     "text": "미안, 미안. 그럼 다음 조건 이야기하자.",
+     "loud": false,
+     "ovl": false,
+     "off": false
+    }
+   ]
   }
  ]
 };
