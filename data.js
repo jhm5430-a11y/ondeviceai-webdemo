@@ -27,8 +27,8 @@ const DEMO_DATA = {
    "encourageAt": null,
    "yellowReason": "발언 독점 감지 (하준 점유 급증)",
    "redReason": "발언 독점 지속 — Gini 0.41 ≥ 0.30",
-   "ivText": "하준 학생의 의견 잘 들었어요. 이번에는 다른 친구들의 생각도 한번 들어볼까요?",
-   "ivDur": 7.37,
+   "ivText": "한 사람의 발언이 길어지고 있어요. 아직 충분히 말하지 않은 친구의 생각도 들어볼까요?",
+   "ivDur": 7.66,
    "timerStart": null,
    "utts": [
     {
@@ -108,8 +108,8 @@ const DEMO_DATA = {
    "encourageAt": null,
    "yellowReason": "윤서 저참여 (누적 발화 0%)",
    "redReason": "윤서 무발언 지속",
-   "ivText": "윤서 학생은 어떻게 생각하나요? 윤서의 생각도 궁금해요.",
-   "ivDur": 5.59,
+   "ivText": "아직 이야기하지 않은 친구가 있어요. 그 친구의 생각도 함께 들어볼까요?",
+   "ivDur": 6.7,
    "timerStart": null,
    "utts": [
     {
@@ -199,7 +199,7 @@ const DEMO_DATA = {
    "yellowReason": "침묵 12초 경과",
    "redReason": "침묵 19초 경과",
    "ivText": "지금 어떤 부분이 고민되나요? 방금 나온 조건 중에서 하나씩 의견을 말해 볼까요?",
-   "ivDur": 7.49,
+   "ivDur": 7.54,
    "timerStart": null,
    "utts": [
     {
@@ -253,7 +253,7 @@ const DEMO_DATA = {
    "yellowReason": "주제 집중도 하락 (0.46)",
    "redReason": "주제 집중도 0.31 < 0.37",
    "ivText": "재미있는 이야기지만, 지금은 AI 산출물을 인정할 조건을 정하고 있어요. 주제로 돌아와 볼까요?",
-   "ivDur": 8.62,
+   "ivDur": 8.83,
    "timerStart": null,
    "utts": [
     {
@@ -343,7 +343,7 @@ const DEMO_DATA = {
    "yellowReason": "질문 없음 지속",
    "redReason": "상호 질문 부재 — 논의 심화 정체",
    "ivText": "서로의 생각에 대해 궁금한 점을 질문해 보면 어떨까요? 왜 그 조건이 중요한지 물어봐도 좋아요.",
-   "ivDur": 8.06,
+   "ivDur": 8.3,
    "timerStart": null,
    "utts": [
     {
@@ -424,7 +424,7 @@ const DEMO_DATA = {
    "yellowReason": "발화 볼륨 상승 (하준)",
    "redReason": "큰 소리 지속 10초+",
    "ivText": "목소리가 조금 커졌어요. 중요한 의견일수록 차분하게 말하면 더 잘 전달돼요.",
-   "ivDur": 7.37,
+   "ivDur": 7.85,
    "timerStart": null,
    "utts": [
     {
@@ -505,7 +505,7 @@ const DEMO_DATA = {
    "yellowReason": "중첩 발화 감지",
    "redReason": "중첩 발화 반복 — 스팬 5초+",
    "ivText": "여러 명이 동시에 말하고 있어요. 한 사람씩 차례대로 이야기해 볼까요?",
-   "ivDur": 6.14,
+   "ivDur": 6.7,
    "timerStart": null,
    "utts": [
     {
@@ -595,7 +595,7 @@ const DEMO_DATA = {
    "yellowReason": "단계 종료 10초 전",
    "redReason": "단계 시간 종료",
    "ivText": "이번 단계 시간이 다 되었어요. 지금까지 나온 조건을 정리하고, 다음 단계로 넘어가 볼까요?",
-   "ivDur": 8.16,
+   "ivDur": 8.4,
    "timerStart": 30,
    "utts": [
     {
@@ -676,7 +676,7 @@ const DEMO_DATA = {
    "yellowReason": "논의 정체 감지 (동일 주장 반복)",
    "redReason": "정체 지속 — 단계 진행 필요",
    "ivText": "같은 논의가 반복되고 있어요. 지금까지 나온 의견을 바탕으로, 해결안 합의 단계로 넘어가 볼까요?",
-   "ivDur": 8.59,
+   "ivDur": 8.81,
    "timerStart": null,
    "utts": [
     {
@@ -757,7 +757,7 @@ const DEMO_DATA = {
    "yellowReason": null,
    "redReason": null,
    "ivText": "모두 근거를 들어 활발하게 참여하고 있어요! 아주 좋아요. 이 흐름 그대로 이어가 볼까요?",
-   "ivDur": 8.33,
+   "ivDur": 8.74,
    "timerStart": null,
    "utts": [
     {

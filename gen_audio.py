@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 웹 데모 음원 생성 — 기능 10종 시나리오(각 ~40s) + AI 개입 TTS
-- edge-tts로 발화별 합성(경국대 대본 성우: 하준=InJoon·수아=SunHi·지호=Hyunsu·윤서=Ava, AI=Emma)
+- edge-tts로 발화별 합성(경국대 대본 성우: 하준=InJoon·수아=SunHi·지호=Hyunsu·윤서=Ava, AI=SunHi 피치+)
 - ffmpeg.exe(Windows, WSL interop)로 타임라인 배치 합성 → audio/scenario_<id>.mp3 (40s)
 - 개입 멘트 → audio/iv_<id>.mp3
 - 실측 타이밍으로 data.js (DEMO_DATA) 출력 → 웹 UI가 이 타임라인으로 애니메이션
@@ -22,7 +22,7 @@ VOICE = {
     "수아": "ko-KR-SunHiNeural",
     "지호": "ko-KR-HyunsuMultilingualNeural",
     "윤서": "en-US-AvaMultilingualNeural",
-    "AI": "en-US-EmmaMultilingualNeural",
+    "AI": "ko-KR-SunHiNeural",  # 앱 TTS와 같은 한국어 여성 톤 (피치 +로 수아와 구분)
 }
 TOPIC = "AI가 작성한 보고서나 발표자료를 학습자의 산출물로 인정할 수 있는가"
 STAGES = ["문제탐색", "아이디어발산", "비판검토", "해결안합의"]
@@ -37,7 +37,7 @@ FEATURES = [
          desc="한 학생이 발언을 독점하면 감지해 골고루 참여하도록 안내합니다.",
          yellowAt=18, redAt=28, yellowReason="발언 독점 감지 (하준 점유 급증)",
          redReason="발언 독점 지속 — Gini 0.41 ≥ 0.30",
-         ivText="하준 학생의 의견 잘 들었어요. 이번에는 다른 친구들의 생각도 한번 들어볼까요?",
+         ivText="한 사람의 발언이 길어지고 있어요. 아직 충분히 말하지 않은 친구의 생각도 들어볼까요?",
          utts=[
              u(0.5, "수아", "AI가 만든 보고서를 어디까지 인정할지 이야기해 보자."),
              u(4.8, "하준", "나는 확실히 반대야. AI가 다 써 주면 그게 왜 내 산출물이야?"),
@@ -51,7 +51,7 @@ FEATURES = [
          desc="발언이 없는 학생을 감지해 자연스럽게 참여를 이끌어냅니다.",
          yellowAt=20, redAt=28, yellowReason="윤서 저참여 (누적 발화 0%)",
          redReason="윤서 무발언 지속",
-         ivText="윤서 학생은 어떻게 생각하나요? 윤서의 생각도 궁금해요.",
+         ivText="아직 이야기하지 않은 친구가 있어요. 그 친구의 생각도 함께 들어볼까요?",
          utts=[
              u(0.5, "하준", "AI 사용을 밝히기만 하면 인정해도 된다고 생각해."),
              u(5.2, "수아", "밝히는 것만으로는 부족하지 않아? 직접 고친 부분이 있어야지."),
@@ -213,12 +213,15 @@ def dur_of(mp3):
     return float(r.stdout.strip())
 
 
-async def tts(text, voice, out):
-    await edge_tts.Communicate(text, voice).save(out)
+async def tts(text, voice, out, rate=None, pitch=None):
+    kw = {}
+    if rate: kw["rate"] = rate
+    if pitch: kw["pitch"] = pitch
+    await edge_tts.Communicate(text, voice, **kw).save(out)
 
 
-def synth(text, voice, out):
-    asyncio.run(tts(text, voice, out))
+def synth(text, voice, out, rate=None, pitch=None):
+    asyncio.run(tts(text, voice, out, rate, pitch))
 
 
 def build_feature(f):
@@ -271,7 +274,7 @@ def build_feature(f):
     if f.get("ivText"):
         iv = os.path.join(AUD, f"iv_{f['id']}.mp3")
         if not os.path.exists(iv):
-            synth(f["ivText"], VOICE["AI"], iv)
+            synth(f["ivText"], VOICE["AI"], iv, rate="-4%", pitch="+18Hz")
         f["ivDur"] = round(dur_of(iv), 2)
     else:
         f["ivDur"] = None

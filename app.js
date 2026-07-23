@@ -24,7 +24,7 @@
   });
 
   // 교사 뷰 전환: 모둠 카드 ↔ 드릴다운
-  $("mCard").onclick = () => { $("tMainView").classList.add("hidden"); $("tDetailView").classList.remove("hidden"); };
+  $("mCard").onclick = () => { $("tMainView").classList.add("hidden"); $("tDetailView").classList.remove("hidden"); renderCloud(); };
   $("btnBack").onclick = () => { $("tDetailView").classList.add("hidden"); $("tMainView").classList.remove("hidden"); };
   // 수업 설정(데모 표시용) 펼치기/접기
   $("btnClassCfg").onclick = () => $("cfgPanel").classList.toggle("hidden");
@@ -91,7 +91,7 @@
     setAiMsg("안녕하세요! 오늘 토론도 함께 힘내 봐요.", "");
     $("aiAvatar").classList.remove("speaking");
     $("aiAvatar").src = "robot_green.png";
-    $("aiCard").classList.remove("active");
+    $("aiCard").classList.remove("active", "enc");
     setTeam("ok", "✅ 잘 진행 중");
     setTopic(topicVal);
     $("ctxNote").textContent = "";
@@ -110,7 +110,7 @@
     $("silenceNow").textContent = "현재 0초";
     $("cntSilence").textContent = "0회";
     $("cntOverlap").textContent = "0회";
-    $("wordCloud").innerHTML = '<span style="color:#8AA0B4">대화가 시작되면 키워드가 쌓입니다</span>';
+    $("wordCloud").innerHTML = '<span class="cloud-empty">대화가 시작되면 키워드가 쌓입니다</span>';
     $("topicSpkBars").innerHTML = "";
     $("topicBadge").classList.add("hidden");
     $("ivEffects").innerHTML = '<small class="dim">개입 발생 시 전후 변화를 집계합니다</small>';
@@ -197,6 +197,7 @@
       fired.recovered = true;
       setStatus("green", "안정");
       $("mTag").innerHTML = "&nbsp;"; $("mTag").className = "g-chip";
+      setTeam("ok", "✅ 잘 진행 중");
       log("🟢", "개입 후 회복 — 대화 정상화", "g");
       showEffects(t);
     }
@@ -207,6 +208,7 @@
     scenario.pause();
     setAiMsg(feat.ivText, kind === "encourage" ? "encourage" : "");
     $("aiCard").classList.add("active");
+    $("aiCard").classList.toggle("enc", kind === "encourage");   // 개입=빨강, 격려=노랑
     $("aiAvatar").classList.add("speaking");
     // 학생 앱과 동일: 🔴 개입 중에만 로봇 빨강(><), 격려는 초록 유지
     if (kind === "red") $("aiAvatar").src = "robot_red.png";
@@ -215,6 +217,7 @@
     $("captionText").textContent = "(AI 음성 개입 중…)";
     $("captionText").className = "cap-text";
     if (kind === "red") {
+      setTeam("bad", "🤖 AI가 함께하고 있어요");   // 학생 화면 '우리 팀 상태'도 주의 표시
       setStatus("red", "개입필요");
       $("dIvCnt").textContent = "1회";
       $("mTag").innerHTML = `${TYPE_ICON[feat.type] || "⚠️"} ${feat.redReason}`;
@@ -231,7 +234,7 @@
   function afterIntervention() {
     $("aiAvatar").classList.remove("speaking");
     $("aiAvatar").src = "robot_green.png";
-    $("aiCard").classList.remove("active");
+    $("aiCard").classList.remove("active", "enc");
     if ((feat.type === "flow" || feat.type === "timer") && !fired.advanced) {
       fired.advanced = true;
       stageIdx = Math.min(stageIdx + 1, DEMO_DATA.stages.length - 1);
@@ -455,13 +458,50 @@
     }).join("");
   }
   function renderCloud() {
-    const top = Object.entries(words).sort((a, b) => b[1] - a[1]).slice(0, 14);
+    const top = Object.entries(words).sort((a, b) => b[1] - a[1]).slice(0, 18);
+    const cl = $("wordCloud");
     if (!top.length) return;
+    if (!cl.clientWidth) return;   // 상세 뷰가 숨겨져 있으면 측정 불가 → 뷰 열 때 재렌더
+    const PALETTE = ["#1565C0", "#00897B", "#6A1B9A", "#EF6C00", "#C62828", "#2E7D32", "#455A64", "#AD1457"];
     const max = top[0][1];
-    $("wordCloud").innerHTML = top.map(([w, c]) => {
-      const size = 12 + Math.round(10 * Math.sqrt(c / max));
-      return `<span class="${c >= max && c > 1 ? "big" : ""}" style="font-size:${size}px">${w}</span>`;
-    }).join("");
+    // 단어셋 기반 시드 랜덤 — 같은 단어셋이면 같은 배치(갱신 때마다 튀지 않게)
+    let s = 0;
+    top.forEach(([w, c]) => { for (const ch of w) s = (s * 31 + ch.charCodeAt(0)) | 0; s = (s + c * 7) | 0; });
+    s >>>= 0;
+    const rnd = () => {
+      s = (s + 0x6D2B79F5) | 0;
+      let t = Math.imul(s ^ (s >>> 15), 1 | s);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    cl.innerHTML = "";
+    const W = cl.clientWidth, H = cl.clientHeight, GAP = 6, placed = [];
+    const fits = (x, y, w0, h0) => placed.every((r) =>
+      x + w0 + GAP <= r.x || r.x + r.w + GAP <= x || y + h0 + GAP <= r.y || r.y + r.h + GAP <= y);
+    top.forEach(([w, c], i) => {
+      const ratio = c / max;
+      const sp = document.createElement("span");
+      sp.textContent = w;
+      sp.style.fontSize = Math.round(12 + 14 * Math.sqrt(ratio)) + "px";
+      sp.style.color = PALETTE[i % PALETTE.length];
+      if (ratio >= 0.55) sp.style.fontWeight = "bold";
+      cl.appendChild(sp);
+      const w0 = sp.offsetWidth, h0 = sp.offsetHeight;
+      const maxX = Math.max(0, W - w0), maxY = Math.max(0, H - h0);
+      let x = 0, y = 0, ok = false;
+      for (let k = 0; k < 220 && !ok; k++) {
+        x = Math.round(rnd() * maxX); y = Math.round(rnd() * maxY);
+        ok = fits(x, y, w0, h0);
+      }
+      if (!ok) {   // 드문 실패 시 격자 탐색 (실기기와 동일한 폴백)
+        outer: for (y = 0; y <= maxY; y += 8) {
+          for (x = 0; x <= maxX; x += 8) { if (fits(x, y, w0, h0)) { ok = true; break outer; } }
+        }
+      }
+      if (!ok) { sp.remove(); return; }   // 빈자리 없으면 그 단어는 생략 (겹침 방지 우선)
+      sp.style.left = x + "px"; sp.style.top = y + "px";
+      placed.push({ x, y, w: w0, h: h0 });
+    });
   }
   function renderBars(cur) {
     const total = Math.max(0.001, Object.values(talk).reduce((a, b) => a + b, 0));

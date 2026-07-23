@@ -57,7 +57,12 @@ nav#featureGrid .fi { font-size: 20px; display: block; margin-bottom: 2px; }
 .s-label.teal { color: var(--teal); } .s-label.purple { color: var(--purple); } .s-label.blue { color: var(--blue); }
 .s-topic { font-size: 17px; font-weight: bold; color: var(--ink); line-height: 1.4; padding-top: 2px; }
 #aiCard { border: 2px solid transparent; transition: background .3s, border-color .3s; }
-#aiCard.active { background: #FFF3E0; border-color: var(--yellow); box-shadow: 0 0 12px rgba(224,145,18,.35); }
+/* 🔴 AI 개입 중 = 빨간 강조 (실기기 bg_card_red·bg_bubble_red 재현) */
+#aiCard.active { background: #FDEEEE; border-color: var(--red); box-shadow: 0 0 12px rgba(198,40,40,.35); }
+#aiCard.active .ai-msg { background: #FBDCDC; color: #7C1F1F; }
+/* ✨ 격려는 따뜻한 노랑 유지 (개입 아님) */
+#aiCard.active.enc { background: #FFF7DF; border-color: var(--yellow); box-shadow: 0 0 12px rgba(224,145,18,.3); }
+#aiCard.active.enc .ai-msg { background: #FFF3C9; color: #6B5200; }
 .ai-flex { display: flex; gap: 12px; align-items: center; flex: 1; padding: 10px 0; }
 .s-robot { width: 72px; height: 72px; object-fit: contain; transition: transform .3s; }
 .s-robot.speaking { transform: scale(1.15); animation: pulse 1.1s infinite; }
@@ -134,7 +139,8 @@ nav#featureGrid .fi { font-size: 20px; display: block; margin-bottom: 2px; }
   display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 15px; }
 .d-header > b { cursor: pointer; }
 .d-header > b:hover { color: var(--blue); }
-.d-stats { display: flex; gap: 16px; }
+/* 실기기 캡처: 헤더 정보가 우측에 몰리지 않고 전체 폭에 균등 간격으로 배치 */
+.d-stats { flex: 1; display: flex; justify-content: space-evenly; gap: 8px; text-align: center; }
 .d-stats small { color: var(--dim); font-size: 10.5px; display: block; }
 .d-stats div > div { font-weight: bold; font-size: 14px; }
 .d-blue { color: var(--blue); } .d-green { color: var(--green); } .d-yellow { color: var(--yellow); }
@@ -159,9 +165,10 @@ nav#featureGrid .fi { font-size: 20px; display: block; margin-bottom: 2px; }
 .d-counters small { color: var(--dim); font-size: 10.5px; }
 .d-cnt { font-size: 18px; font-weight: bold; }
 .d-cnt.r { color: var(--red); } .d-cnt.y { color: var(--yellow); }
-.cloud { min-height: 52px; line-height: 1.9; }
-.cloud span { margin-right: 8px; color: #5B7083; }
-.cloud span.big { color: var(--blue); font-weight: bold; }
+/* 워드클라우드 — 실기기 WordCloudView 재현: 비중첩 랜덤 배치 + 8색 팔레트 */
+.cloud { position: relative; height: 150px; overflow: hidden; }
+.cloud span { position: absolute; white-space: nowrap; line-height: 1.15; }
+.cloud .cloud-empty { position: static; color: #8AA0B4; }
 .fx { font-size: 12.5px; min-height: 52px; line-height: 1.5; }
 .fx .dim { color: var(--dim); }
 .fx b { color: var(--green); }
